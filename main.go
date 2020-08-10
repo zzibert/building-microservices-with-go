@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/zzibert/building-microservices-with-go/handlers"
 )
@@ -23,6 +24,14 @@ func main() {
 	// Listen for connections on all ip addresses (0.0.0.0)
 	// port 9090
 	log.Println("Starting Server")
-	err := http.ListenAndServe(":9090", sm)
-	log.Fatal(err)
+
+	s := &http.Server{
+		Addr:         ":9090",
+		Handler:      sm,
+		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+	}
+
+	s.ListenAndServe()
 }
