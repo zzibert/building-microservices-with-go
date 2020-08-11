@@ -6,6 +6,7 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/zzibert/building-microservices-with-go/data"
 )
 
@@ -17,27 +18,7 @@ func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
 }
 
-func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		p.getProducts(rw, r)
-		return
-	case http.MethodPost:
-		p.addProduct(rw, r)
-		return
-	case http.MethodPut:
-		p.updateProduct(rw, r)
-		return
-	case http.MethodDelete:
-		p.deleteProduct(rw, r)
-		return
-	default:
-		rw.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-}
-
-func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	lp := data.GetProducts()
 	err := lp.ToJSON(rw)
 	if err != nil {
@@ -45,7 +26,7 @@ func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle POST Products")
 
 	product := &data.Product{}
@@ -57,15 +38,18 @@ func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
 	data.AddProduct(product)
 }
 
-func (p *Products) updateProduct(rw http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(path.Base(r.URL.Path))
+func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(rw, "Unable to parse the id", http.StatusBadRequest)
+		return
 	}
 
 	product := data.GetProduct(id)
 	if product == nil {
-		http.Error(rw, "Unable to find the product", http.StatusNotFound)
+		http.Error(rw, "Unable to find the product", http.StatusBadRequest)
 		return
 	}
 	err = product.FromJSON(r.Body)
@@ -74,7 +58,7 @@ func (p *Products) updateProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (p *Products) deleteProduct(rw http.ResponseWriter, r *http.Request) {
+func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(path.Base(r.URL.Path))
 	if err != nil {
 		http.Error(rw, "Unable to parse the id", http.StatusBadRequest)

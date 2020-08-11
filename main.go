@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/zzibert/building-microservices-with-go/handlers"
 )
 
@@ -17,9 +19,16 @@ func main() {
 
 	ph := handlers.NewProducts(l)
 
-	sm := http.NewServeMux()
+	sm := mux.NewRouter()
 
-	sm.Handle("/", ph)
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", ph.GetProducts)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", ph.AddProduct)
 
 	// Listen for connections on all ip addresses (0.0.0.0)
 	// port 9090
