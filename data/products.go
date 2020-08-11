@@ -42,6 +42,22 @@ func GetProduct(id int) *Product {
 	return nil
 }
 
+func DeleteProduct(id int) *Product {
+	p := GetProduct(id)
+	if p == nil {
+		return nil
+	}
+	switch id {
+	case 1:
+		productList = productList[1:]
+	case len(productList) - 1:
+		productList = productList[:(len(productList) - 1)]
+	default:
+		productList = append(productList[:id], productList[(id+1):]...)
+	}
+	return p
+}
+
 func AddProduct(p *Product) {
 	p.ID = getNextId()
 	productList = append(productList, p)
