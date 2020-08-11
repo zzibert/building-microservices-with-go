@@ -3,6 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"path"
+	"strconv"
 
 	"github.com/zzibert/building-microservices-with-go/data"
 )
@@ -23,6 +25,8 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		p.addProduct(rw, r)
 		return
+	case http.MethodPut:
+		p.updateProduct(rw, r)
 	default:
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -47,4 +51,22 @@ func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 	p.l.Printf("Prod %#v", product)
 	data.AddProduct(product)
+}
+
+func (p *Products) updateProduct(rw http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(path.Base(r.URL.Path))
+	if err != nil {
+		http.Error(rw, "Unable to parse the id", http.StatusBadRequest)
+	}
+
+	product := data.GetProduct(id)
+	if product == nil {
+		http.Error(rw, "Unable to find the product", http.StatusBadRequest)
+		return
+	}
+	err = product.FromJSON(r.Body)
+	if err != nil {
+		http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+	}
+
 }

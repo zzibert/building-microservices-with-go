@@ -33,6 +33,15 @@ func GetProducts() Products {
 	return productList
 }
 
+func GetProduct(id int) *Product {
+	for _, p := range productList {
+		if p.ID == id {
+			return p
+		}
+	}
+	return nil
+}
+
 func AddProduct(p *Product) {
 	p.ID = getNextId()
 	productList = append(productList, p)
