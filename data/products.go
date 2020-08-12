@@ -11,12 +11,17 @@ import (
 )
 
 // Product defines the structure for an API product
+// swagger:model
 type Product struct {
+  // the id for this user
+  //
+  // required: true
+  // min: 1
 	ID          int     `json:"id"`
-	Name        string  `json:"name" validate:"required"`
+	Name        string  `json:"name"`
 	Description string  `json:"description"`
-	Price       float32 `json:"price" validate:"gt=0"`
-	SKU         string  `json:"sku" validate:"required,sku"`
+	Price       float32 `json:"price"`
+	SKU         string  `json:"sku"`
 	CreatedOn   string  `json:"-"`
 	UpdatedOn   string  `json:"-"`
 	DeletedOn   string  `json:"-"`
@@ -80,6 +85,10 @@ func UpdateProduct(id int, p *Product) error {
 	productList[pos] = p
 
 	return nil
+}
+
+func DeleteProduct(id int) error {
+	switch 
 }
 
 var ErrProductNotFound = fmt.Errorf("Product not found")
