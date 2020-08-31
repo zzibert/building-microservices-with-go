@@ -12,6 +12,8 @@ import (
 	"github.com/zzibert/building-microservices-with-go/handlers"
 )
 
+var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
+
 func main() {
 
 	env.Parse()
@@ -22,15 +24,19 @@ func main() {
 
 	ph := handlers.NewProducts(l)
 
+	gh := handlers.NewGoodbye(l)
+
 	sm.Handle("/", ph)
+	sm.Handle("/goodbye", gh)
 
 	s := &http.Server{
-		Addr:         ":9090",
+		Addr:         *bindAddress,
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
 	}
+
 	go func() {
 		err := s.ListenAndServe()
 		if err != nil {
